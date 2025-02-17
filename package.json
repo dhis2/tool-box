@@ -1,6 +1,6 @@
 {
-  "name": "tool-template",
-  "description": "Template for basic DHIS2 tools",
+  "name": "tool-box",
+  "description": "Basic tool box for basic DHIS2 tools",
   "version": "0.1.0",
   "dependencies": {
   },
