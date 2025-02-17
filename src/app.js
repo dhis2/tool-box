@@ -10,7 +10,8 @@ const tools_repos = [
     "dhis2/user-role-aggregator",
     "dhis2/tool-option-sorter",
     "dhis2/tool-category-dimension-disabler",
-    "dhis2/tool-deprecated-authorities"
+    "dhis2/tool-deprecated-authorities",
+    "dhis2/tool-box"
 ];
 
 var latest_releases = [];
