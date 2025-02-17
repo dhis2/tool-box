@@ -1,7 +1,7 @@
 {
   "name": "tool-box",
   "description": "Basic tool box for basic DHIS2 tools",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "dependencies": {},
   "devDependencies": {
     "@eslint/eslintrc": "^3.2.0",
@@ -31,6 +31,7 @@
     "zip": "rm -rf compiled && npm run build && mkdir compiled && cd build && zip -r ../compiled/$npm_package_name.zip *"
   },
   "manifest.webapp": {
+    "name": "DHIS2 Admin Toolbox",
     "developer": {
       "company": "HISP Centre - Univeristy of Oslo",
       "email": "dev@dhis2.org",
