@@ -1,6 +1,7 @@
 "use strict";
 import "./css/style.css";
 import { d2Get, d2Delete, d2PostJson } from "./js/d2api.js";
+import { loadLegacyHeaderBarIfNeeded } from "./js/check-header-bar.js";
 
 const tools_repos = [
     "dhis2/tool-dashboard-pruner",
@@ -11,7 +12,9 @@ const tools_repos = [
     "dhis2/tool-option-sorter",
     "dhis2/tool-category-dimension-disabler",
     "dhis2/tool-deprecated-authorities",
-    "dhis2/tool-box"
+    "dhis2/tool-box",
+    "dhis2/tool-user-disabler",
+    "dhis2/tool-job-status"
 ];
 
 var latest_releases = [];
@@ -169,9 +172,10 @@ function renderToolReleases(latest_releases, installed_apps) {
     document.getElementById("mainView").innerHTML = html;
 }
 
+//Load legacy header bar if needed
+loadLegacyHeaderBarIfNeeded();
 
 //Render the tool releases on page load
-
 window.getLatestToolReleases = getLatestToolReleases;
 window.latest_releases = latest_releases;
 
