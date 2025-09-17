@@ -140,7 +140,7 @@ function renderModalWindowTokenInput() {
             let exists = true;
             try {
                 await d2Get("/userDataStore/dhis2-toolbox/github-key");
-            } catch (e) {
+            } catch {
                 exists = false;
             }
             if (exists) {
@@ -258,25 +258,6 @@ function renderToolReleases(latest_releases, installed_apps) {
     html += "</tbody></table>";
     document.getElementById("mainView").innerHTML = html;
     return;
-    releases.forEach(tool => {
-
-        const installed = installed_apps.find(app => app.name.toLowerCase() === tool.name.toLowerCase());
-        const publishedDate = new Date(tool.published_at).toLocaleDateString("en-US", {
-            year: "numeric",
-            month: "long",
-            day: "numeric",
-        });
-
-        html += `<div class="tool-release">
-            <h3>${tool.name}</h3>
-            <p><a href="https://github.com/${tool.repo}" target="_blank">Github repo<a> </h3>
-            <p>Installed version: ${installed ? installed.version : "Not installed"}</p>
-            <p>Current Version: ${tool.version}</p>
-            <p>Released on: ${publishedDate}</p>
-            <a href="${tool.download_url}">Download</a>
-        </div>`;
-    });
-    document.getElementById("mainView").innerHTML = html;
 }
 
 //Load legacy header bar if needed
