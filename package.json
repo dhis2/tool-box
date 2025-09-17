@@ -1,7 +1,7 @@
 {
   "name": "tool-box",
   "description": "Basic tool box for basic DHIS2 tools",
-  "version": "0.1.4",
+  "version": "0.1.5",
   "dependencies": {},
   "devDependencies": {
     "@eslint/eslintrc": "^3.2.0",
