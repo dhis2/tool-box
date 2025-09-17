@@ -10,3 +10,21 @@ body {
 #modal {
     margin: 8px;
 }
+
+/* Simple table styling for releases */
+.tool-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 12px;
+}
+.tool-table th, .tool-table td {
+    border: 1px solid #ddd;
+    padding: 8px;
+    text-align: left;
+}
+.tool-table thead th {
+    background: #f5f5f5;
+}
+.tool-table tbody tr:nth-child(even) {
+    background: #fafafa;
+}
