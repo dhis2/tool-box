@@ -189,24 +189,76 @@ async function testGitHubWorksAuthenticated(github_key) {
 
 
 function renderToolReleases(latest_releases, installed_apps) {
-    var html = "";
-    //Top level button to refresh the releases
+    let html = "";
+    // Top-level controls
     html += "<button id=\"updateReleases\">Update Releases</button>";
-    html += "<p> Last updated on:" + new Date(latest_releases.fetched_at).toLocaleDateString(
-        "en-US", {
+    const lastUpdated = latest_releases?.fetched_at
+        ? new Date(latest_releases.fetched_at).toLocaleString("en-US", {
             year: "numeric",
             month: "long",
             day: "numeric",
             hour: "numeric",
             minute: "numeric",
-            second: "numeric"
-        }
-    ) + "</p>";
+            second: "numeric",
+        })
+        : "Unknown";
+    html += `<p>Last updated on: ${lastUpdated}</p>`;
     html += "<h2>Tool Releases</h2>";
 
-    //Sort the tools by name
-    latest_releases.releases.sort((a, b) => (a.name || "").localeCompare(b.name || ""));
-    latest_releases.releases.forEach(tool => {
+    const releases = Array.isArray(latest_releases?.releases) ? [...latest_releases.releases] : [];
+    // Sort the tools by name
+    releases.sort((a, b) => (a.name || "").localeCompare(b.name || ""));
+    if (releases.length === 0) {
+        html += "<p>No releases found.</p>";
+        document.getElementById("mainView").innerHTML = html;
+        return;
+    }
+    // Build table header
+    html += `
+        <table class="tool-table">
+            <thead>
+                <tr>
+                    <th>Tool</th>
+                    <th>Installed Version</th>
+                    <th>Latest Version</th>
+                    <th>Released On</th>
+                    <th>Download</th>
+                </tr>
+            </thead>
+            <tbody>
+    `;
+    // Build rows and render table immediately
+    const rows = releases.map(tool => {
+        const installed = installed_apps.find(app => (app.name || "").toLowerCase() === (tool.name || "").toLowerCase());
+        let publishedDate = "Unknown";
+        if (tool.published_at && !isNaN(Date.parse(tool.published_at))) {
+            publishedDate = new Date(tool.published_at).toLocaleDateString("en-US", {
+                year: "numeric",
+                month: "long",
+                day: "numeric",
+            });
+        }
+        const downloadCell = tool.download_url && tool.download_url !== "unknown"
+            ? `<a href="${tool.download_url}" target="_blank" rel="noopener noreferrer">Download</a>`
+            : "-";
+        const repoLink = tool.repo
+            ? `<a href="https://github.com/${tool.repo}" target="_blank" rel="noopener noreferrer">${tool.name}</a>`
+            : (tool.name || "-");
+        return `
+            <tr>
+                <td>${repoLink}</td>
+                <td>${installed ? installed.version : "Not installed"}</td>
+                <td>${tool.version || "Unknown"}</td>
+                <td>${publishedDate}</td>
+                <td>${downloadCell}</td>
+            </tr>
+        `;
+    }).join("");
+    html += rows;
+    html += "</tbody></table>";
+    document.getElementById("mainView").innerHTML = html;
+    return;
+    releases.forEach(tool => {
 
         const installed = installed_apps.find(app => app.name.toLowerCase() === tool.name.toLowerCase());
         const publishedDate = new Date(tool.published_at).toLocaleDateString("en-US", {
