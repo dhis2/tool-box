@@ -1,6 +1,6 @@
 "use strict";
 import "./css/style.css";
-import { d2Get, d2Delete, d2PostJson } from "./js/d2api.js";
+import { d2Get, d2Delete, d2PostJson, d2PutJson } from "./js/d2api.js";
 import { loadLegacyHeaderBarIfNeeded } from "./js/check-header-bar.js";
 
 const tools_repos = [
@@ -95,6 +95,27 @@ async function  saveLatestReleasesToDataStore(latest_releases) {
     await d2PostJson("/dataStore/dhis2-toolbox/latest_releases", latest_releases);
 }
 
+// Very lightweight toast utility
+function showToast(message, type = "info", duration = 3000) {
+    let container = document.querySelector(".toast-container");
+    if (!container) {
+        container = document.createElement("div");
+        container.className = "toast-container";
+        document.body.appendChild(container);
+    }
+    const toast = document.createElement("div");
+    toast.className = `toast ${type}`;
+    toast.role = "alert";
+    toast.textContent = message;
+    container.appendChild(toast);
+    // Trigger transition
+    requestAnimationFrame(() => toast.classList.add("show"));
+    setTimeout(() => {
+        toast.classList.remove("show");
+        setTimeout(() => toast.remove(), 200);
+    }, duration);
+}
+
 function renderModalWindowTokenInput() {
     var modalContent = document.getElementById("modalContent");
     modalContent.innerHTML = `<div id="modalContent">
@@ -103,12 +124,46 @@ function renderModalWindowTokenInput() {
         a GitHub token, paste it here to get started. Your key will be stored
         in the user data store, and only visible to your user.</p>
         <input type="text" id="githubKey" placeholder="Enter your GitHub key">
-        <button id="saveKey">Save</button>
+        <div style="margin-top:8px; display:flex; gap:8px;">
+            <button id="saveKey">Save</button>
+            <button id="clearKey" type="button">Clear stored token</button>
+        </div>
     </div>`;
     document.getElementById("saveKey").addEventListener("click", async () => {
         const github_key = document.getElementById("githubKey").value;
-        await d2PostJson("/userDataStore/dhis2-toolbox/github-key", github_key);
-        window.location.reload();
+        if (!github_key) {
+            showToast("Please enter a GitHub key.", "error");
+            return;
+        }
+        try {
+            // Check existence: if present, update via PUT; else create via POST
+            let exists = true;
+            try {
+                await d2Get("/userDataStore/dhis2-toolbox/github-key");
+            } catch (e) {
+                exists = false;
+            }
+            if (exists) {
+                await d2PutJson("/userDataStore/dhis2-toolbox/github-key", github_key);
+            } else {
+                await d2PostJson("/userDataStore/dhis2-toolbox/github-key", github_key);
+            }
+            showToast("GitHub token saved.", "success");
+            setTimeout(() => window.location.reload(), 500);
+        } catch (error) {
+            console.error("Failed to save GitHub key:", error);
+            showToast("Failed to save GitHub key. Please try again.", "error");
+        }
+    });
+    document.getElementById("clearKey").addEventListener("click", async () => {
+        try {
+            await d2Delete("/userDataStore/dhis2-toolbox/github-key");
+            showToast("Stored GitHub token cleared.", "success");
+            setTimeout(() => window.location.reload(), 500);
+        } catch (error) {
+            console.error("Failed to clear GitHub key:", error);
+            showToast("Failed to clear token.", "error");
+        }
     });
 }
 
@@ -242,7 +297,7 @@ document.addEventListener("DOMContentLoaded", async function () {
         //Check if the key is valid
         const github_key_valid = await testGitHubWorksAuthenticated(github_key);
         if (!github_key_valid) {
-            alert("The GitHub key you have entered is invalid. Please enter a valid key.");
+            showToast("The GitHub key you have entered is invalid.", "error");
             renderModalWindowTokenInput();
             return;
         }
